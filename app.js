@@ -462,10 +462,13 @@ async function reloadDay() { await loadDay(); S.history = null; render(); }
 const actions = {
   async signin() {
     const email = $('#a-email').value.trim(), password = $('#a-pass').value;
+    if (!email || !password) { toast('Type your email and password first'); return; }
     const { error } = await sb.auth.signInWithPassword({ email, password }); if (error) toast(error.message);
   },
   async signup() {
     const email = $('#a-email').value.trim(), password = $('#a-pass').value;
+    if (!email.includes('@')) { toast('Type your email address first'); return; }
+    if (password.length < 6) { toast('Choose a password of at least 6 characters'); return; }
     const { data, error } = await sb.auth.signUp({ email, password });
     if (error) toast(error.message); else if (!data.session) toast('Check your email to confirm, then sign in.');
   },
@@ -617,6 +620,19 @@ document.addEventListener('input', (e) => {
   }
   if (b.startsWith('f.')) st.f[b.slice(2)] = el.value;
 });
+// Roll over to the new day when the app is reopened after midnight
+// (only if you were on "today" — if you were browsing an older day, it stays there).
+let lastToday = todayStr();
+async function checkNewDay() {
+  const now = todayStr();
+  if (now === lastToday) return;
+  const wasOnToday = S.day === lastToday;
+  lastToday = now;
+  if (wasOnToday && S.user) { S.day = now; S.history = null; await loadDay(); if (!S.sheet) render(); }
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkNewDay(); });
+setInterval(checkNewDay, 60000);
+
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Enter') return;
   if (e.target.id === 'a-pass') actions.signin();
