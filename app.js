@@ -56,7 +56,7 @@ const num = (v) => { const n = parseFloat(String(v ?? '').replace(',', '.')); re
 const has = (v) => v !== null && v !== undefined && String(v).trim() !== '';
 const r0 = (n) => Math.round(n);
 const r1 = (n) => Math.round(n * 10) / 10;
-const pad = (n) => String(n).padStart(2, '0');
+function pad(n) { return String(n).padStart(2, '0'); }
 function dateStr(d) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
 function todayStr() { return dateStr(new Date()); }
 function addDays(str, n) { const [y, m, d] = str.split('-').map(Number); return dateStr(new Date(y, m - 1, d + n)); }
